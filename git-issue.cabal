@@ -3,5 +3,5 @@ name:          git-issue
 version:       0.1.0.0
 
 library
-  exposed-modules: GitIssue
+  exposed-modules: GitIssues
   build-depends:   base
