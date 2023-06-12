@@ -1,5 +1,5 @@
 import ./nix/shell.nix {
-  name = "git-shell";
+  name = "git-issues";
   devTools = { pkgs }: with pkgs; [
     gnumake
   ];
