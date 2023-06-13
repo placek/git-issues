@@ -5,3 +5,11 @@ version:       0.1.0.0
 library
   exposed-modules: GitIssues
   build-depends:   base
+                 , optparse-applicative
+
+executable         git-issues
+  main-is:         Main.hs
+  other-modules:   GitIssues
+  build-depends:   base
+                 , git-issues
+                 , optparse-applicative

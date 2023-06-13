@@ -1,7 +1,8 @@
 module GitIssues where
 
-type TicketID = String
-type TicketBody = String
-type FilterQuery = String
+type TicketFilePath = FilePath
+type TicketMessage = String
+type TicketQuery = String
 
-data Ticket = Ticket TicketID TicketBody
+
+data Ticket = Ticket TicketFilePath TicketMessage deriving Show
