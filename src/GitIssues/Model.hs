@@ -1,4 +1,4 @@
-module GitIssues where
+module GitIssues.Model where
 
 type TicketFilePath = FilePath
 type TicketMessage = String

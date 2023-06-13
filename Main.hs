@@ -1,7 +1,7 @@
 module Main where
 
 import           Options.Applicative
-import           GitIssues
+import           GitIssues.Model
 
 -- * Data model
 
@@ -115,6 +115,6 @@ issuesCommand = subparser
   )
 
 -- For now just show the internal parsed data model for options.
+main :: IO ()
 main = do
-  command <- execParser (info issuesCommand (progDesc "The git issues is a swiss army tool for managing tasks and controlling repository history in order to keep track of project progress and workflow."))
-  print command
+  print =<< execParser (info issuesCommand (progDesc "The git issues is a swiss army tool for managing tasks and controlling repository history in order to keep track of project progress and workflow."))
