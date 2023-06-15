@@ -1,15 +1,37 @@
 module GitIssues.Model where
 
+import           CMark     as M
+import           Data.Char (isAlphaNum)
+import qualified Data.Text as T
+
 -- * Low level data types
 
 -- | Ticket file path.
 type TicketFilePath = FilePath
 
 -- | Ticket content.
-type TicketMessage = String
+data TicketMessage = Message T.Text T.Text deriving Show
+
+getDocumentTitle :: Node -> T.Text
+getDocumentTitle (M.Node _ M.DOCUMENT nodes) = title nodes
+  where title :: [M.Node] -> T.Text
+        title []    = ""
+        title (n:_) = getNodeTitle n
+        getNodeTitle :: M.Node -> T.Text
+        getNodeTitle (M.Node _ _ [Node _ (TEXT t) _]) = t
+        getNodeTitle _                                = ""
+getDocumentTitle _ = ""
+
+textToMessage :: T.Text -> TicketMessage
+textToMessage text = Message normalisedID normalisedText
+  where nodes = commonmarkToNode [optNormalize] text
+        normalisedText = nodeToCommonmark [optNormalize, optSafe] (Just 80) nodes
+        normalisedID = T.filter isIDChar . T.toLower . T.intercalate "-" . T.words . getDocumentTitle $ nodes
+        isIDChar '-' = True
+        isIDChar a   = isAlphaNum a
 
 -- | Ticket query string.
-type TicketQuery = String
+type TicketQuery = T.Text
 
 -- * Ticket data representation
 

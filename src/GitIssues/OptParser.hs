@@ -1,7 +1,18 @@
 module GitIssues.OptParser where
 
-import           GitIssues.Model
-import           Options.Applicative
+import           GitIssues.Model     (Command (..),
+                                      FilterOptions (FilterOptions),
+                                      FinishOptions (FinishOptions),
+                                      PickOptions (PickOptions),
+                                      RefineOptions (RefineOptions),
+                                      RemoveOptions (RemoveOptions),
+                                      ReportOptions (ReportOptions),
+                                      Ticket (..), TicketFilePath,
+                                      TicketMessage, TicketQuery, textToMessage)
+import           Options.Applicative (Parser, ParserInfo, argument, command,
+                                      execParser, help, info, long, metavar,
+                                      progDesc, short, str, strOption,
+                                      subparser)
 
 -- * Generic parsers
 
@@ -11,7 +22,7 @@ filePathArgument = argument str ( metavar "FILE" <> help "The issue file." )
 
 -- | Parse a ticket content.
 messageOption :: Parser TicketMessage
-messageOption = strOption ( long "message" <> short 'm' <> metavar "MESSAGE" <> help "The message - body of the issue." )
+messageOption = textToMessage <$> strOption ( long "message" <> short 'm' <> metavar "MESSAGE" <> help "The message - body of the issue." )
 
 -- | Parse a ticket.
 ticketOptions :: Parser Ticket
