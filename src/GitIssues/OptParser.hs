@@ -1,5 +1,6 @@
 module GitIssues.OptParser where
 
+import           Control.Applicative (optional)
 import           GitIssues.Model     (Command (..),
                                       FilterOptions (FilterOptions),
                                       FinishOptions (FinishOptions),
@@ -7,8 +8,8 @@ import           GitIssues.Model     (Command (..),
                                       RefineOptions (RefineOptions),
                                       RemoveOptions (RemoveOptions),
                                       ReportOptions (ReportOptions),
-                                      Ticket (..), TicketFilePath,
-                                      TicketMessage, TicketQuery, textToMessage)
+                                      TicketFilePath, TicketMessage,
+                                      TicketQuery, textToMessage)
 import           Options.Applicative (Parser, ParserInfo, argument, command,
                                       execParser, help, info, long, metavar,
                                       progDesc, short, str, strOption,
@@ -21,16 +22,12 @@ filePathArgument :: Parser TicketFilePath
 filePathArgument = argument str ( metavar "FILE" <> help "The issue file." )
 
 -- | Parse a ticket content.
-messageOption :: Parser TicketMessage
-messageOption = textToMessage <$> strOption ( long "message" <> short 'm' <> metavar "MESSAGE" <> help "The message - body of the issue." )
-
--- | Parse a ticket.
-ticketOptions :: Parser Ticket
-ticketOptions = Ticket <$> filePathArgument <*> messageOption
+messageOption :: Parser (Maybe TicketMessage)
+messageOption = optional $ textToMessage <$> strOption ( long "message" <> short 'm' <> metavar "MESSAGE" <> help "The message - body of the issue." )
 
 -- | Parse a filtering query.
-queryOption :: Parser TicketQuery
-queryOption = argument str ( metavar "QUERY" <> help "The query expression." )
+queryOption :: Parser (Maybe TicketQuery)
+queryOption = optional $ argument str ( metavar "QUERY" <> help "The query expression." )
 
 -- * Per-commmand parsers
 
@@ -40,7 +37,7 @@ reportOptions = ReportOptions <$> messageOption
 
 -- | Parse a 'refine' command options.
 refineOptions :: Parser RefineOptions
-refineOptions = RefineOptions <$> ticketOptions
+refineOptions = RefineOptions <$> filePathArgument <*> messageOption
 
 -- | Parse a 'remove' command options.
 removeOptions :: Parser RemoveOptions

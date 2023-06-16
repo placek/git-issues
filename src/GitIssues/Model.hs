@@ -38,7 +38,7 @@ type TicketQuery = T.Text
 -- | The ticket.
 data Ticket = Ticket TicketFilePath TicketMessage deriving Show
 
--- * Option parser data model
+-- * CLI option parser data model
 
 -- | The 'Command' data model is a ADT for representing the executable commands,
 -- arguments, options and parameters. Those arguments encapsulated are the
@@ -52,17 +52,20 @@ data Command
   | Filter FilterOptions
   deriving Show
 
--- | Report a new ticket.
+-- | Report a new ticket. Lack of ticket message suggests that the application
+-- should open an editor to get one.
 newtype ReportOptions
   = ReportOptions
-    { reportedMessage :: TicketMessage  -- ^ The exact content of the ticket.
+    { reportedMessage :: Maybe TicketMessage  -- ^ The exact content of the ticket. Can be empty.
     }
     deriving Show
 
--- | Edit the existing ticket.
-newtype RefineOptions
+-- | Edit the existing ticket. Lack of ticket message suggests that the
+-- application should open an editor to get one.
+data RefineOptions
   = RefineOptions
-    { refinedTicket :: Ticket  -- ^ The refined ticket.
+    { refinedFilePath :: TicketFilePath  -- ^ The refined ticket.
+    , refinedMessage :: Maybe TicketMessage  -- ^ The refined content of the ticket. Can be empty.
     }
     deriving Show
 
@@ -87,9 +90,10 @@ newtype FinishOptions
     }
     deriving Show
 
--- | Browse the tickets by filtering them.
+-- | Browse the tickets by filtering them. Lack of query string implies the full
+-- list of tickets.
 newtype FilterOptions
   = FilterOptions
-    { query :: TicketQuery  -- ^ The filteing query.
+    { query :: Maybe TicketQuery  -- ^ The filteing query. Can be empty.
     }
     deriving Show
