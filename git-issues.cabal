@@ -16,6 +16,8 @@ library
   hs-source-dirs:     src
   build-depends:      base
                     , cmark
+                    , filepath
+                    , tomland
                     , optparse-applicative
                     , text
 
