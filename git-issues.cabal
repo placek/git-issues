@@ -12,6 +12,7 @@ library
   exposed-modules:    GitIssues
                     , GitIssues.Model
                     , GitIssues.OptParser
+                    , GitIssues.Config
   hs-source-dirs:     src
   build-depends:      base
                     , cmark
