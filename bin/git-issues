@@ -1,22 +1,30 @@
 #!/bin/sh
 
-_usage() {
-  echo "Usage: $0 log [-s SINCE] [-u UNTIL] [QUERY]"
-  echo "       $0 show ISSUE"
-  echo
-  echo "  -s SINCE  Show history since date"
-  echo "  -u UNTIL  Show history until date"
-  echo "  QUERY     Search for files matching QUERY"
-  exit 1
-}
+################################ PARSE OPTIONS #################################
+# Command
+command=$1
+shift
 
-_get_blob() {
-  git cat-file blob "$1"
-}
+# Options
+while getopts "s:u:" opt; do
+  case $opt in
+    s) since="$OPTARG" ;;
+    u) until="$OPTARG" ;;
+  esac
+done
 
-_get_history() {
-  git log --raw --find-renames --pretty=format:'%H' --since="${since:-50 years ago}" --until "${until:-now}"; echo
-}
+shift $((OPTIND -1))
+
+# IFS=' '
+# query="$(echo "$@" | sed 's/\//\\\//g')"
+
+################################## FUNCTIONS ###################################
+
+# Helpers
+_get_blob() { git cat-file blob "$1"; }
+_get_hash() { echo -n "$1" | git hash-object --stdin; }
+_yellow() { tput setaf 3; echo "$@"; tput sgr0; }
+_get_history() { git log --raw --find-renames --pretty=format:'%H' --since="${since:-50 years ago}" --until "${until:-now}"; echo; }
 
 _filter_symlinks_only() {
   symlink_pattern='\(12\|00\)0000 \(12\|00\)0000 '
@@ -57,42 +65,40 @@ _filter_symlinks_only() {
 #   printf "$result" | sed 's/:/\n:/'
 # }
 
+# Commands
+
+_log() {
+  _get_history | \
+  _filter_symlinks_only #| \
+  #_search
+}
+
 _show() {
   if [ -f "$1" ]; then
-    tput setaf 3
-    echo "issue $(echo -n "$1" | git hash-object --stdin)"
-    tput sgr0
+    _yellow "issue $(_get_hash "$1")"
     cat "$1"
   else
-    tput setaf 3
-    echo "issue $1"
-    tput sgr0
-    cat $(git cat-file blob "$1")
+    _yellow "issue $1"
+    cat $(_get_blob "$1")
   fi
 }
 
-case $1 in
-  l*)
-    shift
-    while getopts "s:u:" opt; do
-      case $opt in
-        s) since="$OPTARG" ;;
-        u) until="$OPTARG" ;;
-      esac
-    done
+_usage() {
+  echo "Usage: $0 log [-s SINCE] [-u UNTIL] [QUERY]"
+  echo "       $0 show ISSUE"
+  echo
+  echo "  -s SINCE  Show history since date"
+  echo "  -u UNTIL  Show history until date"
+  echo "  QUERY     Search for files matching QUERY"
+  exit 1
+}
 
-    shift $((OPTIND -1))
+################################### MAIN #######################################
 
-    # IFS=' '
-    # query="$(echo "$@" | sed 's/\//\\\//g')"
-    _get_history | \
-    _filter_symlinks_only #| \
-    #_search
-    ;;
-
-  s*)
-    _show "$2"
-    ;;
-
-  *) _usage; exit 0 ;;
+case $command in
+  l*) _log ;;
+  s*) _show "$1" ;;
+  *) _usage ;;
 esac
+
+exit 0
