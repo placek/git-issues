@@ -2,7 +2,7 @@
 
 export PATH="$PATH:$(pwd)/bin"
 
-cd $(mktemp -d)
+pushd $(mktemp -d)
 git init
 
 echo -e "As an owner of the car\nI want to have a clear car\nso I cannot be ashamed in front of my GF" > wash_a_car
@@ -40,3 +40,4 @@ git commit -m '[wash_a_car] Reverted from archive'
 
 $SHELL
 rm -rf $(pwd)
+popd
