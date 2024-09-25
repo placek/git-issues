@@ -73,3 +73,42 @@ Its main goals are:
 * Provide a way to create, modify, resolve, close, reopen, delete, etc. the
   issues in the repository. This will be an alias tool for modifying files and
   managing symlinks in the categories structures.
+
+User guide
+----------
+
+Show full history of the issues:
+
+    git issues log
+
+Show history of the issues since the last week:
+
+    git issues log -s "last week"
+
+Show history of the issues until the last week:
+
+    git issues log -u "last week"
+
+Show the task details under file `wash_a_car`:
+
+    git issues show wash_a_car
+
+Show the task details for the task with ID `57a804a`:
+
+    git issues show 57a804a
+
+Show the history of task `57a804a`:
+
+    git issues log ":57a804a"
+
+Show the history of tasks other than `57a804a` and in category `sprint_1`:
+
+    git issues log "!:57a804a" sprint_1
+
+Show the history of tasks that end up at some point in `sprint_1/in_progress`:
+
+    git issues log ">sprint_1/in_progress"
+
+Show the history of tasks that at some point where moved from `sprint_1/in_progress`:
+
+    git issues log "sprint_1/in_progress.*>"
