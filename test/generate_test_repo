@@ -5,7 +5,7 @@ export PATH="$PATH:$(pwd)/bin"
 cd $(mktemp -d)
 git init
 
-touch wash_a_car
+echo -e "As an owner of the car\nI want to have a clear car\nso I cannot be ashamed in front of my GF" > wash_a_car
 git add .
 git commit -m 'Add an issue about the car wash'
 
@@ -14,6 +14,7 @@ ln -s wash_a_car sprint_1/todo
 git add .
 git commit -m 'Sprint planning: prepare a backlog for a first sprint'
 
+git checkout -b wash_a_car
 mkdir -p sprint_1/in_progress
 mv sprint_1/todo/wash_a_car sprint_1/in_progress
 git add .
@@ -23,6 +24,8 @@ touch washed_car
 git add .
 git commit -m '[wash_a_car] Implementation'
 
+git checkout master
+git merge --no-commit wash_a_car
 mkdir -p sprint_1/done
 mv sprint_1/in_progress/wash_a_car sprint_1/done
 git add .
@@ -36,3 +39,4 @@ git add .
 git commit -m '[wash_a_car] Reverted from archive'
 
 $SHELL
+rm -rf $(pwd)
