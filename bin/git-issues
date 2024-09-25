@@ -59,7 +59,12 @@ _filter_symlinks_only() {
 _search() {
   result=$(sed -n '/^$/!{ H; d }; x; s/\n//gp')
   for e in $(echo "$query" | tr ' ' "\n"); do
-    result=$(printf '%s' "$result" | grep "$e")
+    if [[ $e == !* ]]; then
+      e=$(printf '%s' "$e" | sed 's/^!//')
+      result=$(printf '%s' "$result" | grep -v "$e")
+    else
+      result=$(printf '%s' "$result" | grep "$e")
+    fi
   done
   printf '%s' "$result" | sed "s/^\\(.*\\):/$(_yellow '\1'):/; 1!s/^/\\n/; s/:/\\n:/"
   echo
