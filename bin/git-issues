@@ -1,0 +1,64 @@
+#!/bin/sh
+
+while getopts "s:u:" opt; do
+  case $opt in
+    s) since="$OPTARG" ;;
+    u) until="$OPTARG" ;;
+  esac
+done
+
+shift $((OPTIND -1))
+
+# IFS=' '
+# query="$(echo "$@" | sed 's/\//\\\//g')"
+
+_get_blob() {
+  git cat-file blob "$1"
+}
+
+_get_history() {
+  git log --raw --find-renames --pretty=format:'%H' --since="${since:-50 years ago}" --until "${until:-now}"; echo
+}
+
+_filter_symlinks_only() {
+  symlink_pattern='\(12\|00\)0000 \(12\|00\)0000 '
+  sed -n -e "
+    /^$/! {                        # if not empty line:
+      /^:/!H;                      #   if not history line, append to hold space
+      /^:$symlink_pattern/ {       #   if history line is a symlink:
+        s/$symlink_pattern//;      #     remove symlink pattern
+        s/0\\+ //;                 #     remove leading zeros
+        s/\\([^ ]*\\) \\1 /\\1 /;  #     remove duplicate hash
+        s/\\<R100\\>/M/;           #     rename R100 -> M
+        H;                         #     append to hold space
+      };                           #   end if
+      d;                           #   delete line
+    };                             # end if
+    x;                             # exchange hold space with pattern space
+    /:/!d;                         # if no files summary, delete
+    s/^\\n//;                      # remove leading newline
+    s/\\t/ /g;                     # replace tabs with spaces
+    p;                             # print
+    i\\\\
+  " | sed -e '
+    /^:/ {                         # if history line:
+      s/ A \(.*\)$/ >\1/;          #   prepend > to added files
+      s/ D \(.*\)$/ \1>/;          #   append > to deleted files
+      s/ M \(.*\) \(.*\)$/ \1>\2/; #   replace R with >
+    };                             # end if
+  '
+}
+
+# _match() { sed -n "/^$/!{ H; d }; x; /\\n:[^\\n]*$1/!d; s/^\\n//; p; i\\\\"; }
+# 
+# _search() {
+#   result=$(sed -n '/^$/!{ H; d }; x; s/\n//gp')
+#   for e in $query; do
+#     result=$(printf "$result" | grep "$e")
+#   done
+#   printf "$result" | sed 's/:/\n:/'
+# }
+
+_get_history | \
+_filter_symlinks_only #| \
+#_search

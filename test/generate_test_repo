@@ -1,0 +1,33 @@
+#!/bin/sh
+
+git init
+
+touch wash_a_car
+git add .
+git commit -m 'Add an issue about the car wash'
+
+mkdir -p sprint_1/todo
+ln -s wash_a_car sprint_1/todo
+git add .
+git commit -m 'Sprint planning: prepare a backlog for a first sprint'
+
+mkdir -p sprint_1/in_progress
+mv sprint_1/todo/wash_a_car sprint_1/in_progress
+git add .
+git commit -m '[wash_a_car] Start of work'
+
+touch washed_car
+git add .
+git commit -m '[wash_a_car] Implementation'
+
+mkdir -p sprint_1/done
+mv sprint_1/in_progress/wash_a_car sprint_1/done
+git add .
+git commit -m '[wash_a_car] Finished'
+
+git rm sprint_1/done/wash_a_car
+git commit -m '[wash_a_car] Archived'
+
+ln -s wash_a_car sprint_1/done
+git add .
+git commit -m '[wash_a_car] Reverted from archive'
