@@ -1,16 +1,14 @@
 #!/bin/sh
 
-while getopts "s:u:" opt; do
-  case $opt in
-    s) since="$OPTARG" ;;
-    u) until="$OPTARG" ;;
-  esac
-done
-
-shift $((OPTIND -1))
-
-# IFS=' '
-# query="$(echo "$@" | sed 's/\//\\\//g')"
+_usage() {
+  echo "Usage: $0 log [-s SINCE] [-u UNTIL] [QUERY]"
+  echo "       $0 show ISSUE"
+  echo
+  echo "  -s SINCE  Show history since date"
+  echo "  -u UNTIL  Show history until date"
+  echo "  QUERY     Search for files matching QUERY"
+  exit 1
+}
 
 _get_blob() {
   git cat-file blob "$1"
@@ -59,6 +57,42 @@ _filter_symlinks_only() {
 #   printf "$result" | sed 's/:/\n:/'
 # }
 
-_get_history | \
-_filter_symlinks_only #| \
-#_search
+_show() {
+  if [ -f "$1" ]; then
+    tput setaf 3
+    echo "issue $(echo -n "$1" | git hash-object --stdin)"
+    tput sgr0
+    cat "$1"
+  else
+    tput setaf 3
+    echo "issue $1"
+    tput sgr0
+    cat $(git cat-file blob "$1")
+  fi
+}
+
+case $1 in
+  l*)
+    shift
+    while getopts "s:u:" opt; do
+      case $opt in
+        s) since="$OPTARG" ;;
+        u) until="$OPTARG" ;;
+      esac
+    done
+
+    shift $((OPTIND -1))
+
+    # IFS=' '
+    # query="$(echo "$@" | sed 's/\//\\\//g')"
+    _get_history | \
+    _filter_symlinks_only #| \
+    #_search
+    ;;
+
+  s*)
+    _show "$2"
+    ;;
+
+  *) _usage; exit 0 ;;
+esac
