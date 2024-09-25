@@ -1,5 +1,11 @@
 #!/bin/sh
 
+################################### SETTINGS ###################################
+
+GIT_ISSUES_COMMIT_COLOR="${GIT_ISSUES_COMMIT_COLOR:-33}"
+GIT_ISSUES_TASK_COLOR="${GIT_ISSUES_TASK_COLOR:-32}"
+GIT_ISSUES_INFO_COLOR="${GIT_ISSUES_INFO_COLOR:-37}"
+
 ################################ PARSE OPTIONS #################################
 # Command
 command=$1
@@ -22,9 +28,11 @@ query="$@"
 ################################## FUNCTIONS ###################################
 
 # Helpers
+_emphase_commit() { printf "\x1b[${GIT_ISSUES_COMMIT_COLOR}m%s\x1b[0m" "$@"; }
+_emphase_task() { printf "\x1b[${GIT_ISSUES_TASK_COLOR}m%s\x1b[0m" "$@"; }
+_emphase_info() { printf "\x1b[${GIT_ISSUES_INFO_COLOR}m%s\x1b[0m" "$@"; }
 _get_blob() { git cat-file blob "$1"; }
 _get_hash() { printf '%s' "$1" | git hash-object --stdin; }
-_yellow() { printf "\x1b[33m%s\x1b[0m" "$@"; }
 _get_history() { git log --raw --find-renames --pretty=format:'%H' --since="${since:-50 years ago}" --until "${until:-now}"; echo; }
 
 _filter_symlinks_only() {
@@ -66,7 +74,12 @@ _search() {
       result=$(printf '%s' "$result" | grep "$e")
     fi
   done
-  printf '%s' "$result" | sed "s/^\\(.*\\):/$(_yellow '\1'):/; 1!s/^/\\n/; s/:/\\n:/"
+  printf '%s' "$result" | sed "
+    s/^\\(.*\\):/$(_emphase_commit '\1'):/;
+    1!s/^/\\n/;
+    s/:\\([^ ]*\\)/\\n:$(_emphase_task '\1')/;
+    s/[:>]/$(_emphase_info '&')/g;
+  "
   echo
 }
 
@@ -77,11 +90,14 @@ _log() {
 }
 
 _show() {
+  _emphase_info "issue "
   if [ -f "$1" ]; then
-    _yellow "issue $(_get_hash "$1")"
+    _emphase_task "$(_get_hash "$1")"
+    echo
     cat "$1"
   else
-    _yellow "issue $1"
+    _emphase_task "$1"
+    echo
     cat "$(_get_blob "$1")"
   fi
 }
